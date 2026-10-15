@@ -1,0 +1,542 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f6f5ef">
+  <title>Dominó Dó — placar e mesa</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=DM+Serif+Display&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --paper: #f6f5ef;
+      --card: #fffefa;
+      --ink: #1f2924;
+      --muted: #78817a;
+      --line: #e8e8df;
+      --green: #244f3e;
+      --green-deep: #193c30;
+      --green-soft: #e7f0e9;
+      --lime: #d9ef9b;
+      --gold: #f0c86c;
+      --coral: #d8775c;
+      --shadow: 0 16px 42px rgba(32, 46, 37, .08);
+      --radius: 22px;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--paper); color: var(--ink); font-family: 'DM Sans', system-ui, sans-serif; min-height: 100vh; }
+    button, input { font: inherit; }
+    button { cursor: pointer; }
+    button:focus-visible, input:focus-visible { outline: 3px solid rgba(77, 127, 92, .35); outline-offset: 2px; }
+    .page { width: min(1120px, calc(100% - 40px)); margin: 0 auto; padding: 24px 0 54px; }
+    .topbar { display: flex; align-items: center; justify-content: space-between; gap: 18px; margin-bottom: 25px; }
+    .brand { display: flex; align-items: center; gap: 12px; }
+    .brand-mark { width: 44px; height: 44px; display: grid; place-items: center; background: var(--green); color: var(--lime); border-radius: 15px; box-shadow: 0 8px 18px #244f3e26; }
+    .brand-mark svg { width: 25px; height: 25px; }
+    .brand-name { font-family: 'DM Serif Display', Georgia, serif; font-size: 25px; letter-spacing: -.4px; line-height: 1; }
+    .brand-sub { font-size: 11px; color: var(--muted); margin-top: 5px; letter-spacing: .12em; text-transform: uppercase; font-weight: 700; }
+    .top-status { display: flex; align-items: center; gap: 8px; color: #627068; font-size: 12px; font-weight: 700; background: #fffefa; border: 1px solid var(--line); border-radius: 999px; padding: 9px 13px; }
+    .status-dot { width: 7px; height: 7px; border-radius: 99px; background: #6f9b61; }
+    .hero { position: relative; overflow: hidden; display: grid; grid-template-columns: 1.3fr .7fr; gap: 22px; padding: 32px 36px; border-radius: 28px; color: #fff; background: radial-gradient(circle at 85% 0%, #3c755a 0, transparent 30%), linear-gradient(120deg, #1d4435, #285a43); box-shadow: 0 20px 45px rgba(31, 76, 55, .15); }
+    .hero:after { content: ''; position: absolute; width: 260px; height: 260px; border: 1px solid #ffffff18; border-radius: 50%; right: 10%; top: -145px; box-shadow: 0 0 0 28px #ffffff08, 0 0 0 58px #ffffff05; pointer-events: none; }
+    .hero-copy, .hero-art { position: relative; z-index: 1; }
+    .eyebrow { margin: 0 0 11px; font-size: 11px; text-transform: uppercase; letter-spacing: .18em; font-weight: 800; color: var(--lime); }
+    h1 { font-family: 'DM Serif Display', Georgia, serif; font-size: clamp(34px, 5vw, 49px); line-height: 1; letter-spacing: -.6px; margin: 0; font-weight: 400; }
+    .hero-copy p:last-child { color: #d2dfd4; font-size: 14px; line-height: 1.6; max-width: 470px; margin: 13px 0 0; }
+    .hero-art { display: flex; align-items: center; justify-content: center; gap: 13px; transform: rotate(-8deg); }
+    .hero-art .domino { width: 64px; height: 116px; }
+    .hero-art .domino:first-child { transform: translateY(9px) rotate(-8deg); }
+    .hero-art .domino:last-child { transform: translateY(-9px) rotate(8deg); }
+    .tabs { display: flex; gap: 7px; width: fit-content; background: #eaeae2; border-radius: 14px; padding: 5px; margin: 23px 0 20px; }
+    .tab { border: 0; background: transparent; color: #68736a; font-size: 13px; font-weight: 700; padding: 10px 17px; border-radius: 10px; transition: .2s; }
+    .tab.active { color: var(--ink); background: var(--card); box-shadow: 0 3px 10px #28352c12; }
+    .section-head { display: flex; align-items: end; justify-content: space-between; gap: 16px; margin: 28px 0 14px; }
+    .section-title { font-family: 'DM Serif Display', Georgia, serif; font-size: 25px; font-weight: 400; margin: 0; }
+    .section-note { color: var(--muted); font-size: 12px; margin: 5px 0 0; }
+    .setup-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .card { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: 0 5px 18px #26372c06; }
+    .team-setup { padding: 19px; transition: .2s; }
+    .team-setup.picking { border-color: #84a48a; box-shadow: 0 0 0 3px #dceadd; }
+    .team-top { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+    .team-title-wrap { display: flex; align-items: center; gap: 10px; min-width: 0; }
+    .team-swatch { width: 11px; height: 11px; border-radius: 4px; flex: 0 0 auto; }
+    .swatch-a { background: var(--green); }
+    .swatch-b { background: var(--coral); }
+    .team-name-input { width: 100%; min-width: 0; border: 0; border-bottom: 1px dashed transparent; background: transparent; color: var(--ink); font-weight: 800; padding: 4px 0; }
+    .team-name-input:hover, .team-name-input:focus { border-bottom-color: #b9c1b7; outline: 0; }
+    .team-members { min-height: 52px; display: flex; flex-wrap: wrap; align-content: flex-start; gap: 7px; margin: 18px 0 14px; }
+    .member-chip { display: inline-flex; align-items: center; gap: 7px; border: 1px solid #e7e9df; background: #f7f8f3; padding: 7px 9px 7px 11px; border-radius: 999px; font-size: 12px; font-weight: 700; }
+    .remove-member { border: 0; padding: 0; width: 17px; height: 17px; border-radius: 50%; background: #e8ebe3; color: #727c73; font-size: 13px; line-height: 1; }
+    .empty-members { color: #9ba39a; font-size: 12px; align-self: center; }
+    .pick-btn, .secondary-btn, .primary-btn, .quiet-btn, .danger-btn { display: inline-flex; justify-content: center; align-items: center; gap: 8px; border-radius: 12px; font-size: 12px; font-weight: 800; padding: 10px 13px; transition: transform .15s, background .15s, box-shadow .15s; }
+    .pick-btn { background: #f0f2eb; color: #36443a; border: 1px solid #e5e8df; }
+    .pick-btn:hover, .secondary-btn:hover, .quiet-btn:hover { background: #e8ede4; transform: translateY(-1px); }
+    .picker { margin-top: 16px; border-top: 1px solid var(--line); padding-top: 14px; }
+    .picker-label { color: var(--muted); font-size: 11px; margin: 0 0 9px; font-weight: 700; }
+    .player-tags { display: flex; flex-wrap: wrap; gap: 7px; }
+    .player-tag { border: 1px solid #e7e9df; color: #475249; background: white; border-radius: 999px; padding: 7px 11px; font-size: 12px; font-weight: 700; }
+    .player-tag:hover { border-color: #89a78b; background: #f0f6ed; }
+    .player-tag.selected { color: #234432; background: #e7f0e7; border-color: #c3d7c2; }
+    .player-tag.assigned-other { opacity: .42; cursor: not-allowed; text-decoration: line-through; }
+    .no-tags { color: #929a91; font-size: 12px; line-height: 1.5; }
+    .add-player { display: flex; gap: 8px; margin-top: 12px; }
+    .text-input { min-width: 0; flex: 1; border: 1px solid #e4e7dd; background: #fcfcf8; border-radius: 11px; padding: 11px 12px; color: var(--ink); font-size: 12px; }
+    .text-input::placeholder { color: #a2aaa1; }
+    .icon-add { width: 42px; flex: 0 0 42px; border: 0; border-radius: 11px; background: var(--green); color: white; font-size: 21px; }
+    .icon-add:hover { background: var(--green-deep); }
+    .setup-bottom { display: grid; grid-template-columns: 1fr auto; gap: 16px; align-items: center; padding: 17px 19px; margin-top: 14px; }
+    .target-wrap { display: flex; flex-wrap: wrap; align-items: center; gap: 11px; }
+    .target-label { font-size: 12px; color: #5d695f; font-weight: 700; }
+    .number-options { display: flex; gap: 6px; }
+    .number-option { width: 34px; height: 34px; border-radius: 10px; border: 1px solid #e3e6dc; background: white; color: #657067; font-size: 13px; font-weight: 800; }
+    .number-option.active { background: var(--green); border-color: var(--green); color: white; box-shadow: 0 3px 8px #244f3e2a; }
+    .primary-btn { background: var(--green); color: white; border: 1px solid var(--green); padding: 12px 17px; box-shadow: 0 6px 15px #244f3e20; }
+    .primary-btn:hover { background: var(--green-deep); transform: translateY(-1px); }
+    .primary-btn:disabled { cursor: not-allowed; opacity: .45; box-shadow: none; transform: none; }
+    .secondary-btn { background: #f0f2eb; color: #37443a; border: 1px solid #e5e8df; }
+    .quiet-btn { background: transparent; color: #727b73; border: 1px solid #e4e7df; }
+    .danger-btn { color: #9f453e; background: #fff2ef; border: 1px solid #f4d9d4; }
+    .danger-btn:hover { background: #ffe8e2; }
+    .hint-line { margin: 11px 2px 0; font-size: 11px; color: #818980; }
+    .match-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin: 26px 0 14px; }
+    .match-controls { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+    .scoreboard { overflow: hidden; padding: 0; }
+    .score-topline { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 16px 20px; border-bottom: 1px solid var(--line); }
+    .round-badge { display: inline-flex; align-items: center; gap: 8px; color: #445349; font-size: 12px; font-weight: 800; }
+    .round-pill { background: #f0f2eb; padding: 7px 10px; border-radius: 999px; }
+    .set-target { color: #818a81; font-size: 11px; }
+    .score-teams { display: grid; grid-template-columns: 1fr 78px 1fr; align-items: stretch; }
+    .score-team { padding: 20px 23px; }
+    .score-team:last-child { text-align: right; }
+    .score-team-top { display: flex; gap: 10px; align-items: center; }
+    .score-team:last-child .score-team-top { justify-content: flex-end; }
+    .score-team-name { font-family: 'DM Serif Display', Georgia, serif; font-size: 21px; line-height: 1.2; }
+    .score-members { color: var(--muted); font-size: 11px; margin: 7px 0 0; }
+    .score-count { font-family: 'DM Serif Display', Georgia, serif; font-size: 55px; line-height: 1; margin-top: 11px; }
+    .score-team:last-child .score-count { color: var(--coral); }
+    .score-team:first-child .score-count { color: var(--green); }
+    .score-mid { display: grid; place-items: center; color: #a4aaa2; font-size: 11px; font-weight: 800; border-inline: 1px solid #f0f0e9; }
+    .score-mid span { border-radius: 99px; border: 1px solid var(--line); padding: 8px; background: #fff; }
+    .progress-track { height: 5px; background: #f0f1eb; display: flex; }
+    .progress-a { background: var(--green); transition: width .3s; }
+    .progress-b { background: var(--coral); transition: width .3s; }
+    .status-strip { padding: 11px 20px; color: #69756c; background: #fafbf7; font-size: 11px; display: flex; justify-content: space-between; gap: 8px; }
+    .table-section { margin-top: 16px; }
+    .table-head { display: flex; justify-content: space-between; align-items: center; gap: 14px; margin-bottom: 10px; }
+    .table-title { font-family: 'DM Serif Display', Georgia, serif; font-size: 23px; margin: 0; font-weight: 400; }
+    .stock-tag { color: #667269; background: #fffefa; border: 1px solid var(--line); padding: 8px 11px; border-radius: 999px; font-size: 11px; font-weight: 700; }
+    .felt { min-height: 208px; border: 9px solid #906341; border-radius: 23px; padding: 20px; background: radial-gradient(ellipse at center, #397957, #22553c); box-shadow: inset 0 0 0 2px #d6b07c, inset 0 0 22px #112e2270, 0 8px 22px #3a312022; position: relative; overflow: hidden; }
+    .felt:before { content: ''; position: absolute; inset: 9px; border: 1px solid #c9e0c332; border-radius: 12px; pointer-events: none; }
+    .felt-inner { position: relative; z-index: 1; }
+    .board-meta { display: flex; justify-content: space-between; gap: 10px; color: #dbe9d9; font-size: 10px; font-weight: 700; margin-bottom: 16px; }
+    .board-scroll { overflow-x: auto; scrollbar-width: thin; scrollbar-color: #9fbd9b transparent; padding: 9px 1px 14px; }
+    .board-row { display: flex; align-items: center; gap: 7px; min-width: max-content; min-height: 80px; padding: 0 5px; }
+    .board-empty { min-height: 91px; display: grid; place-items: center; color: #d3e1d3; text-align: center; font-size: 12px; line-height: 1.6; }
+    .end-label { display: inline-flex; flex-direction: column; gap: 4px; align-items: center; color: #e2eddd; font-size: 9px; text-transform: uppercase; letter-spacing: .12em; margin: 0 4px; }
+    .endpoint-value { display: grid; place-items: center; width: 26px; height: 26px; background: #d8ed9b; border-radius: 8px; color: #244431; font-size: 13px; font-weight: 900; }
+    .turn-card { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-top: 14px; padding: 15px 17px; }
+    .turn-info { display: flex; align-items: center; gap: 12px; }
+    .turn-avatar { width: 39px; height: 39px; border-radius: 13px; display: grid; place-items: center; color: var(--green); background: #e9f1e7; font-family: 'DM Serif Display', Georgia, serif; font-size: 19px; }
+    .turn-label { color: #7c867d; font-size: 10px; text-transform: uppercase; letter-spacing: .12em; font-weight: 800; }
+    .turn-name { font-size: 14px; font-weight: 800; margin-top: 2px; }
+    .turn-team { color: #849087; font-size: 11px; margin-top: 2px; }
+    .opponent-strip { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 11px; }
+    .opponent { display: flex; align-items: center; gap: 7px; color: #637066; font-size: 10px; border: 1px solid #e9ebe4; border-radius: 999px; padding: 6px 9px; background: #fffefa; }
+    .opponent.current { color: #31563c; background: #ebf3e9; border-color: #cfdfcb; font-weight: 800; }
+    .count-bubble { color: #68766c; background: #f0f2eb; border-radius: 99px; padding: 2px 6px; font-size: 9px; font-weight: 800; }
+    .hand-card { margin-top: 14px; padding: 17px 19px; }
+    .hand-title-row { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; margin-bottom: 13px; }
+    .hand-title { margin: 0; font-size: 13px; font-weight: 800; }
+    .hand-help { color: var(--muted); font-size: 10px; }
+    .hand { display: flex; flex-wrap: wrap; gap: 9px; align-items: center; }
+    .tile-button { border: 0; background: transparent; padding: 3px; border-radius: 11px; transition: transform .18s, background .18s; }
+    .tile-button:hover { background: #eef3e9; transform: translateY(-4px); }
+    .tile-button:disabled { cursor: not-allowed; opacity: .47; filter: grayscale(.25); }
+    .tile-button:disabled:hover { transform: none; }
+    .play-hint { color: #718076; font-size: 11px; margin: 12px 0 0; min-height: 15px; }
+    .domino { display: flex; flex-direction: column; width: 43px; height: 77px; flex: 0 0 auto; padding: 4px; border: 1px solid #ded9c9; border-radius: 8px; background: linear-gradient(140deg, #fffef7, #eae5d6); box-shadow: 0 4px 8px #1324182b, inset 0 1px 1px white; position: relative; }
+    .domino:after { content: ''; position: absolute; left: 7px; right: 7px; top: 50%; border-top: 1px solid #aaa48f; box-shadow: 0 1px 0 #fff; }
+    .domino.small { width: 38px; height: 66px; padding: 3px; border-radius: 7px; }
+    .domino .half { display: grid; flex: 1; place-items: center; padding: 2px; }
+    .pip-layout { display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr); width: 100%; height: 100%; }
+    .pip { width: 5px; height: 5px; align-self: center; justify-self: center; border-radius: 50%; background: #27332d; box-shadow: inset 0 1px 1px #0008; }
+    .small .pip { width: 4px; height: 4px; }
+    .pip.red { background: #b34f3e; }
+    .board-row .domino.board-tile { flex-direction: row; width: 66px; height: 38px; padding: 3px; margin: 0; border-radius: 7px; }
+    .board-row .domino.board-tile:after { top: 5px; bottom: 5px; left: 50%; right: auto; border-top: 0; border-left: 1px solid #aaa48f; box-shadow: -1px 0 0 #fff; }
+    .board-row .domino.board-tile .half { min-width: 0; padding: 1px; }
+    .board-row .domino.board-tile .pip { width: 4px; height: 4px; }
+    .history-tools { display: flex; justify-content: flex-end; margin-bottom: 12px; }
+    .history-list { display: grid; gap: 10px; }
+    .history-item { display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: center; padding: 17px 19px; }
+    .history-vs { display: flex; align-items: center; flex-wrap: wrap; gap: 7px; font-weight: 800; font-size: 13px; }
+    .history-result { color: #657167; font-size: 11px; margin-top: 7px; }
+    .history-date { color: #899188; font-size: 10px; margin-top: 5px; }
+    .win-label { color: #2d6741; background: #e9f2e7; padding: 4px 7px; border-radius: 7px; font-size: 10px; }
+    .history-actions { display: flex; align-items: center; gap: 10px; }
+    .history-score { font-family: 'DM Serif Display', Georgia, serif; color: var(--green); font-size: 20px; white-space: nowrap; }
+    .empty-history { padding: 39px 20px; text-align: center; color: #7e8980; }
+    .empty-history strong { display: block; color: #435148; font-family: 'DM Serif Display', Georgia, serif; font-size: 20px; font-weight: 400; margin-bottom: 7px; }
+    .toast { position: fixed; z-index: 30; bottom: 22px; left: 50%; transform: translate(-50%, 20px); opacity: 0; pointer-events: none; background: #1e3f31; color: white; font-size: 12px; font-weight: 700; padding: 12px 16px; border-radius: 12px; box-shadow: 0 10px 28px #102a1d40; transition: .25s; max-width: calc(100vw - 32px); text-align: center; }
+    .toast.show { transform: translate(-50%, 0); opacity: 1; }
+    .modal-backdrop { position: fixed; inset: 0; z-index: 40; display: grid; place-items: center; background: #17231bc7; padding: 18px; backdrop-filter: blur(4px); }
+    .modal { width: min(430px, 100%); padding: 23px; background: #fffefa; border-radius: 22px; box-shadow: 0 24px 80px #0004; animation: pop .18s ease-out; }
+    @keyframes pop { from { transform: scale(.97) translateY(7px); opacity: .5; } to { transform: none; opacity: 1; } }
+    .modal-icon { width: 41px; height: 41px; display: grid; place-items: center; border-radius: 14px; background: #ecf3e9; color: var(--green); font-size: 19px; margin-bottom: 13px; }
+    .modal h2 { font-family: 'DM Serif Display', Georgia, serif; font-size: 24px; font-weight: 400; margin: 0; }
+    .modal p { font-size: 12px; color: #748076; line-height: 1.55; margin: 8px 0 17px; }
+    .modal-actions { display: flex; justify-content: flex-end; gap: 8px; flex-wrap: wrap; margin-top: 19px; }
+    .winner-options { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
+    .winner-option { text-align: left; border: 1px solid #e3e8df; background: #fbfcf8; color: var(--ink); border-radius: 13px; padding: 13px; }
+    .winner-option:hover { border-color: #9eb99b; background: #f1f6ee; }
+    .winner-option strong { display: block; font-size: 12px; }
+    .winner-option span { display: block; margin-top: 5px; font-family: 'DM Serif Display', Georgia, serif; font-size: 19px; color: var(--green); }
+    .footer { text-align: center; margin-top: 27px; color: #9aa198; font-size: 10px; }
+    .hidden { display: none !important; }
+    @media (max-width: 700px) {
+      .page { width: min(100% - 24px, 560px); padding-top: 14px; }
+      .topbar { margin-bottom: 15px; }
+      .top-status { font-size: 10px; padding: 8px 10px; }
+      .hero { grid-template-columns: 1fr; padding: 25px 22px 19px; min-height: 205px; }
+      .hero-art { position: absolute; right: 25px; bottom: 9px; transform: scale(.72) rotate(-8deg); transform-origin: right bottom; opacity: .88; }
+      .hero-copy p:last-child { max-width: 270px; }
+      .tabs { margin: 16px 0 18px; }
+      .setup-grid { grid-template-columns: 1fr; gap: 10px; }
+      .team-setup { padding: 16px; }
+      .setup-bottom { grid-template-columns: 1fr; }
+      .setup-bottom .primary-btn { width: 100%; }
+      .match-head { align-items: flex-start; flex-direction: column; }
+      .match-controls { justify-content: flex-start; }
+      .score-team { padding: 16px 12px; }
+      .score-teams { grid-template-columns: 1fr 44px 1fr; }
+      .score-team-name { font-size: 16px; }
+      .score-count { font-size: 45px; }
+      .score-members { font-size: 10px; line-height: 1.4; }
+      .status-strip { font-size: 10px; }
+      .felt { padding: 13px; border-width: 6px; min-height: 174px; }
+      .turn-card { align-items: flex-start; flex-direction: column; }
+      .turn-card .secondary-btn { width: 100%; }
+      .history-item { grid-template-columns: 1fr; }
+      .history-actions { justify-content: space-between; }
+      .hero-art .domino { width: 56px; height: 100px; }
+    }
+    @media (max-width: 390px) {
+      .brand-name { font-size: 22px; }
+      .top-status { max-width: 128px; }
+      .score-teams { grid-template-columns: 1fr 34px 1fr; }
+      .score-team { padding: 14px 8px; }
+      .score-team-name { font-size: 14px; }
+      .score-count { font-size: 39px; }
+      .winner-options { grid-template-columns: 1fr; }
+    }
+
+    .order-card { padding: 18px 19px; margin-top: 14px; }
+    .order-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-bottom: 12px; }
+    .order-title { margin: 0; font-size: 13px; font-weight: 800; }
+    .order-help { color: var(--muted); font-size: 10px; }
+    .order-list { display: grid; gap: 7px; }
+    .order-row { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border: 1px solid #e9ebe4; background: #fbfcf8; border-radius: 12px; }
+    .order-number { width: 25px; height: 25px; display: grid; place-items: center; border-radius: 8px; color: var(--green); background: var(--green-soft); font-size: 11px; font-weight: 900; }
+    .order-player { flex: 1; font-size: 12px; font-weight: 700; }
+    .order-team { color: var(--muted); font-size: 10px; }
+    .order-buttons { display: flex; gap: 5px; }
+    .order-move { width: 29px; height: 29px; border: 1px solid #e4e8df; border-radius: 8px; color: #536257; background: white; font-weight: 900; }
+    .order-move:disabled { opacity: .35; cursor: not-allowed; }
+    .opponent { appearance: none; font-family: inherit; cursor: pointer; }
+    .opponent:focus-visible { outline: 3px solid rgba(77, 127, 92, .35); outline-offset: 2px; }
+    .piece-catalog { display: grid; grid-template-columns: repeat(auto-fill, minmax(58px, 1fr)); gap: 8px; }
+    .catalog-item { min-width: 0; min-height: 112px; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 6px; padding: 7px 3px; border: 1px solid #e7e9df; border-radius: 12px; background: #fffefa; }
+    .catalog-item:hover:not(:disabled) { border-color: #91ad8d; background: #f2f7ef; }
+    .catalog-item:disabled { opacity: 1; filter: none; cursor: default; }
+    .catalog-item.unplayable { opacity: .46; background: #f4f4ef; }
+    .catalog-item.played { background: #e9eee6; border-color: #d8dfd4; }
+    .catalog-item.played .domino { opacity: .55; filter: grayscale(.65); }
+    .piece-meta { max-width: 100%; color: #6f7b70; font-size: 9px; line-height: 1.2; text-align: center; overflow-wrap: anywhere; }
+    .catalog-item.played .piece-meta { color: #46614d; font-weight: 800; }
+    .board-play { display: flex; flex-direction: column; align-items: center; gap: 3px; }
+    .board-play-label { max-width: 76px; color: #e1eadc; font-size: 8px; line-height: 1.15; text-align: center; overflow-wrap: anywhere; }
+    .move-log { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 9px; }
+    .move-log-item { color: #e3eddf; background: #ffffff16; border: 1px solid #ffffff20; border-radius: 999px; padding: 5px 8px; font-size: 9px; white-space: nowrap; }
+    @media (max-width: 500px) {
+      .order-head { align-items: flex-start; flex-direction: column; gap: 4px; }
+      .piece-catalog { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+      .catalog-item { min-height: 105px; }
+      .board-play-label { max-width: 57px; }
+    }
+
+  </style>
+</head>
+<body>
+  <div class="page" id="app"></div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script>
+    (() => {
+      'use strict';
+      const KEY = 'domino-do-v1';
+      const TOTAL_TILES = 28;
+      const PIPS = {
+        0: [], 1: [4], 2: [0,8], 3: [0,4,8], 4: [0,2,6,8],
+        5: [0,2,4,6,8], 6: [0,2,3,5,6,8]
+      };
+      const defaults = { players: [], target: 3, teamNames: { A: 'Dupla Verde', B: 'Dupla Coral' }, setupTeams: { A: [], B: [] }, turnOrder: [], active: null, history: [], view: 'game', picker: 'A', modal: null };
+      let state = loadState();
+      let toastTimer;
+      function loadState() {
+        try {
+          const saved = JSON.parse(localStorage.getItem(KEY) || 'null');
+          if (!saved || typeof saved !== 'object') return structuredClone(defaults);
+          return { ...structuredClone(defaults), ...saved, teamNames: { ...defaults.teamNames, ...(saved.teamNames || {}) }, setupTeams: { A: saved.setupTeams?.A || [], B: saved.setupTeams?.B || [] }, turnOrder: Array.isArray(saved.turnOrder) ? saved.turnOrder : [], players: Array.isArray(saved.players) ? saved.players : [], history: Array.isArray(saved.history) ? saved.history : [] };
+        } catch { return structuredClone(defaults); }
+      }
+      function persist() {
+        try { localStorage.setItem(KEY, JSON.stringify(state)); } catch { toast('Não foi possível salvar neste navegador.'); }
+      }
+      const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+      const initials = name => (String(name || '?').trim().split(/\s+/).slice(0, 2).map(p => p[0]).join('').toUpperCase() || '?');
+      const tileId = (a, b) => a <= b ? `${a}-${b}` : `${b}-${a}`;
+      function makeSet() { const set = []; for (let a = 0; a <= 6; a++) for (let b = a; b <= 6; b++) set.push({ a, b, id: tileId(a,b) }); return set; }
+      function shuffled(items) { const result = [...items]; for (let i = result.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [result[i], result[j]] = [result[j], result[i]]; } return result; }
+      function tileHTML(a, b, small = false) {
+        const half = n => `<div class="half"><div class="pip-layout">${Array.from({length:9}, (_, i) => `<i class="${PIPS[n].includes(i) ? `pip${n === 1 && i === 4 ? ' red' : ''}` : ''}"></i>`).join('')}</div></div>`;
+        return `<div class="domino${small ? ' small' : ''}" aria-label="peça ${a} por ${b}">${half(a)}${half(b)}</div>`;
+      }
+      function boardTileHTML(a, b) { return tileHTML(a, b, true).replace('domino small', 'domino board-tile'); }
+      function toast(message) {
+        const el = document.getElementById('toast'); if (!el) return;
+        el.textContent = message; el.classList.add('show'); clearTimeout(toastTimer); toastTimer = setTimeout(() => el.classList.remove('show'), 2600);
+      }
+      function allAssigned() { return [...state.setupTeams.A, ...state.setupTeams.B]; }
+      function teamSetupCard(team) {
+        const name = state.teamNames[team] || (team === 'A' ? 'Dupla Verde' : 'Dupla Coral');
+        const members = state.setupTeams[team] || [];
+        const other = team === 'A' ? 'B' : 'A';
+        const isPicking = state.picker === team;
+        const tags = state.players.map(person => {
+          const selected = members.includes(person);
+          const assignedOther = state.setupTeams[other].includes(person);
+          return `<button class="player-tag${selected ? ' selected' : ''}${assignedOther ? ' assigned-other' : ''}" data-action="toggle-player" data-team="${team}" data-name="${esc(person)}" ${assignedOther ? 'disabled' : ''}>${selected ? '✓ ' : '+ '}${esc(person)}</button>`;
+        }).join('');
+        return `<article class="card team-setup${isPicking ? ' picking' : ''}">
+          <div class="team-top"><div class="team-title-wrap"><span class="team-swatch swatch-${team.toLowerCase()}"></span><input class="team-name-input" maxlength="24" aria-label="Nome da dupla" data-team-name="${team}" value="${esc(name)}"></div><span style="font-size:10px;color:#879087">${members.length} ${members.length === 1 ? 'pessoa' : 'pessoas'}</span></div>
+          <div class="team-members">${members.length ? members.map(person => `<span class="member-chip">${esc(person)}<button class="remove-member" data-action="remove-player" data-team="${team}" data-name="${esc(person)}" aria-label="Remover ${esc(person)} da dupla">×</button></span>`).join('') : '<span class="empty-members">Escolha quem vai jogar nesta dupla</span>'}</div>
+          <button class="pick-btn" data-action="pick-team" data-team="${team}">${isPicking ? 'Selecionando para esta dupla' : '+ Adicionar pessoas'}</button>
+          ${isPicking ? `<div class="picker"><p class="picker-label">Toque nos nomes para incluir ou remover</p><div class="player-tags">${tags || '<span class="no-tags">Cadastre os nomes abaixo para criar sua lista de jogadores.</span>'}</div><form class="add-player" data-form="add-player" data-team="${team}"><input class="text-input" name="player" maxlength="24" placeholder="Novo nome de jogador" autocomplete="off" aria-label="Novo nome de jogador"><button class="icon-add" type="submit" aria-label="Cadastrar jogador">+</button></form></div>` : ''}
+        </article>`;
+      }
+      function baseSetupPlayers() {
+        const A = [...state.setupTeams.A], B = [...state.setupTeams.B], players = [];
+        const max = Math.max(A.length, B.length);
+        for (let i = 0; i < max; i++) { if (A[i]) players.push({name:A[i],team:'A'}); if (B[i]) players.push({name:B[i],team:'B'}); }
+        return players;
+      }
+      function orderedSetupPlayers() {
+        const players = baseSetupPlayers(), names = players.map(p => p.name), seen = new Set();
+        const order = [...state.turnOrder.filter(name => names.includes(name) && !seen.has(name) && seen.add(name)), ...names.filter(name => !seen.has(name))];
+        return order.map(name => players.find(p => p.name === name)).filter(Boolean);
+      }
+      function setupOrderView() {
+        const players = orderedSetupPlayers();
+        return `<section class="card order-card"><div class="order-head"><h3 class="order-title">Sequência das jogadas</h3><span class="order-help">Use as setas para definir a ordem. Ela se repete a cada rodada.</span></div>${players.length ? `<div class="order-list">${players.map((p,i) => `<div class="order-row"><span class="order-number">${i+1}º</span><span class="order-player">${esc(p.name)}</span><span class="order-team">${esc(state.teamNames[p.team])}</span><span class="order-buttons"><button class="order-move" data-action="move-order" data-index="${i}" data-direction="-1" aria-label="Mover ${esc(p.name)} para cima" ${i === 0 ? 'disabled' : ''}>↑</button><button class="order-move" data-action="move-order" data-index="${i}" data-direction="1" aria-label="Mover ${esc(p.name)} para baixo" ${i === players.length-1 ? 'disabled' : ''}>↓</button></span></div>`).join('')}</div>` : `<p class="no-tags">Selecione os jogadores nas duplas para montar a sequência.</p>`}</section>`;
+      }
+      function setupView() {
+        const enough = state.setupTeams.A.length > 0 && state.setupTeams.B.length > 0 && allAssigned().length >= 2;
+        return `<div class="section-head"><div><h2 class="section-title">Monte as duplas</h2><p class="section-note">Cadastre os nomes uma vez; depois, escolha-os pelas tags.</p></div></div>
+          <div class="setup-grid">${teamSetupCard('A')}${teamSetupCard('B')}</div>${setupOrderView()}
+          <div class="card setup-bottom"><div class="target-wrap"><span class="target-label">Vitórias para ganhar</span><div class="number-options" role="group" aria-label="Vitórias necessárias">${[1,2,3,4,5].map(n => `<button class="number-option${state.target === n ? ' active' : ''}" data-action="target" data-value="${n}" aria-pressed="${state.target === n}">${n}</button>`).join('')}</div><span style="font-size:10px;color:#899188">primeiro a atingir o limite</span></div><button class="primary-btn" data-action="start-match" ${enough ? '' : 'disabled'}>Começar partida <span aria-hidden="true">→</span></button></div>
+          <p class="hint-line">${enough ? `${allAssigned().length} jogadores selecionados · conjunto completo de ${TOTAL_TILES} peças` : 'Selecione ao menos uma pessoa em cada dupla para começar.'}</p>`;
+      }
+      function scoreView(match) {
+        const a = match.wins.A, b = match.wins.B, target = match.target;
+        const total = a + b;
+        const progressA = total ? a / total * 100 : 50;
+        const round = match.round;
+        return `<div class="match-head"><div><h2 class="section-title">A partida está valendo</h2><p class="section-note">Marque cada peça jogada, ajuste a vez quando precisar e acompanhe a sequência na mesa.</p></div><div class="match-controls"><button class="quiet-btn" data-action="reset-match">↺ Zerar jogo</button><button class="danger-btn" data-action="new-match">× Encerrar partida</button></div></div>
+          <section class="card scoreboard" aria-label="Placar da partida"><div class="score-topline"><span class="round-badge"><span class="round-pill">Rodada ${match.roundNumber}</span><span>Placar geral</span></span><span class="set-target">Meta: ${target} ${target === 1 ? 'vitória' : 'vitórias'}</span></div>
+          <div class="score-teams"><div class="score-team"><div class="score-team-top"><span class="team-swatch swatch-a"></span><span class="score-team-name">${esc(match.teamNames.A)}</span></div><div class="score-members">${match.teams.A.map(esc).join(' · ')}</div><div class="score-count">${a}</div></div><div class="score-mid"><span>VS</span></div><div class="score-team"><div class="score-team-top"><span class="score-team-name">${esc(match.teamNames.B)}</span><span class="team-swatch swatch-b"></span></div><div class="score-members">${match.teams.B.map(esc).join(' · ')}</div><div class="score-count">${b}</div></div></div>
+          <div class="progress-track"><div class="progress-a" style="width:${progressA}%"></div><div class="progress-b" style="width:${100-progressA}%"></div></div><div class="status-strip"><span>${total} ${total === 1 ? 'rodada concluída' : 'rodadas concluídas'}</span><span>${Math.max(0, target - Math.max(a,b))} ${Math.max(0, target - Math.max(a,b)) === 1 ? 'vitória' : 'vitórias'} para a dupla mais próxima</span></div></section>
+          ${roundTableView(match)}
+          <div class="opponent-strip" aria-label="Escolha de quem é a vez">${round.players.map((p,i) => { const played = round.moves.filter(m => m.player === p.name).length; return `<button type="button" class="opponent${i === round.turn ? ' current' : ''}" data-action="set-turn" data-index="${i}" aria-pressed="${i === round.turn}">${i === round.turn ? '▶ ' : ''}${esc(p.name)} <span class="count-bubble">${played} ${played === 1 ? 'jogada' : 'jogadas'}</span></button>`; }).join('')}</div>
+          ${handView(match)}
+          <div style="display:flex;justify-content:flex-end;margin-top:12px"><button class="secondary-btn" data-action="finish-round">✓ Registrar resultado da rodada</button></div>`;
+      }
+      function roundTableView(match) {
+        const round = match.round, moves = round.moves || [], current = round.players[round.turn];
+        const chain = moves.length ? `<span class="end-label"><span class="endpoint-value">${round.leftEnd}</span>Esquerda</span>${moves.map((m,i) => `<span class="board-play" title="Jogada ${m.sequence || i+1}: ${esc(m.player)}"><span>${boardTileHTML(m.displayA ?? m.tile.a, m.displayB ?? m.tile.b)}</span><small class="board-play-label">${m.sequence || i+1} · ${esc(m.player)}</small></span>`).join('')}<span class="end-label"><span class="endpoint-value">${round.rightEnd}</span>Direita</span>` : '';
+        return `<section class="table-section"><div class="table-head"><h3 class="table-title">Mesa de jogo</h3><div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end"><span class="stock-tag">${TOTAL_TILES - moves.length} de ${TOTAL_TILES} peças disponíveis</span><button class="quiet-btn" data-action="undo-move" ${moves.length ? '' : 'disabled'}>↶ Desfazer última</button></div></div>
+          <div class="felt"><div class="felt-inner"><div class="board-meta"><span>JOGADAS: ${moves.length}</span><span>PEÇAS NÃO MARCADAS: ${TOTAL_TILES - moves.length}</span></div><div class="board-scroll"><div class="board-row">${moves.length ? chain : '<div class="board-empty">A mesa está limpa.<br>Toque em qualquer peça para registrar a abertura.</div>'}</div></div>${moves.length ? `<div class="move-log" aria-label="Sequência das jogadas">${moves.slice().sort((a,b) => (a.sequence || 0) - (b.sequence || 0)).map((m,i) => `<span class="move-log-item">${m.sequence || i+1}. ${esc(m.player)}: ${m.tile.a}|${m.tile.b}</span>`).join('')}</div>` : ''}</div></div>
+          <div class="card turn-card"><div class="turn-info"><div class="turn-avatar">${initials(current.name)}</div><div><div class="turn-label">Vez de jogar · ${round.turn + 1}º na sequência</div><div class="turn-name">${esc(current.name)}</div><div class="turn-team">${esc(match.teamNames[current.team])} · ${round.moves.filter(m => m.player === current.name).length} jogadas registradas</div></div></div><button class="secondary-btn" data-action="skip-turn">↷ Passar a vez</button></div>
+        </section>`;
+      }
+      function handView(match) {
+        const round = match.round, moves = round.moves || [], player = round.players[round.turn];
+        const played = new Map(moves.map((m,i) => [m.tile.id, {player:m.player, sequence:m.sequence || i+1}]));
+        const canPlay = tile => !moves.length || tile.a === round.leftEnd || tile.b === round.leftEnd || tile.a === round.rightEnd || tile.b === round.rightEnd;
+        const available = TOTAL_TILES - played.size;
+        return `<section class="card hand-card"><div class="hand-title-row"><h3 class="hand-title">Todas as peças do dominó</h3><span class="hand-help">${available} restantes · vez de ${esc(player.name)} · toque na peça jogada</span></div><div class="piece-catalog">${makeSet().map(t => { const mark = played.get(t.id), valid = canPlay(t); return `<button type="button" class="tile-button catalog-item${mark ? ' played' : valid ? '' : ' unplayable'}" data-action="play-tile" data-id="${t.id}" aria-label="${mark ? `Peça ${t.a} por ${t.b}, jogada por ${mark.player}` : `Marcar peça ${t.a} por ${t.b}${valid ? '' : ', não encaixa nas pontas atuais'}`}" ${mark || !valid ? 'disabled' : ''}>${tileHTML(t.a,t.b)}<span class="piece-meta">${mark ? `Jogada ${mark.sequence}<br>${esc(mark.player)}` : valid ? 'Disponível' : 'Não encaixa'}</span></button>`; }).join('')}</div><p class="play-hint">${moves.length ? 'As peças já marcadas ficam destacadas. Para corrigir um registro, use “Desfazer última”.' : 'A primeira peça pode ser qualquer uma. Depois, só ficam habilitadas as peças que encaixam nas pontas.'} Você também pode tocar no nome acima para ajustar de quem é a vez.</p></section>`;
+      }
+      function historyView() {
+        const entries = [...state.history].reverse();
+        return `<div class="section-head"><div><h2 class="section-title">Histórico de partidas</h2><p class="section-note">Vitórias, placares finais e rodadas salvos neste dispositivo.</p></div></div>
+          ${entries.length ? `<div class="history-tools"><button class="danger-btn" data-action="clear-history">Excluir todo o histórico</button></div><div class="history-list">${entries.map(item => `<article class="card history-item"><div><div class="history-vs"><span>${esc(item.teamNames.A)}</span><span style="color:#a5aca4">×</span><span>${esc(item.teamNames.B)}</span><span class="win-label">${esc(item.winnerName)} venceu</span></div><div class="history-result">${item.teams.A.map(esc).join(' · ')} <span style="color:#b0b7ae">vs</span> ${item.teams.B.map(esc).join(' · ')}</div><div class="history-date">${formatDate(item.completedAt)} · ${item.rounds.length} ${item.rounds.length === 1 ? 'rodada' : 'rodadas'}</div></div><div class="history-actions"><span class="history-score">${item.wins.A} — ${item.wins.B}</span><button class="danger-btn" data-action="delete-history" data-id="${item.id}" aria-label="Excluir partida do histórico">Excluir</button></div></article>`).join('')}</div>` : `<div class="card empty-history"><strong>Seu histórico começa na primeira vitória</strong>As partidas concluídas aparecem aqui com o placar final. Você pode removê-las quando quiser.</div>`}`;
+      }
+      function formatDate(value) { try { return new Intl.DateTimeFormat('pt-BR', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(value)); } catch { return ''; } }
+      function modalHTML() {
+        const m = state.modal; if (!m) return '';
+        if (m.type === 'finish') return `<div class="modal-backdrop" data-action="backdrop"><section class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title"><div class="modal-icon">✦</div><h2 id="modal-title">Quem ganhou esta rodada?</h2><p>Escolha a dupla vencedora. O placar só encerra a partida quando alguém atingir ${state.active.target} ${state.active.target === 1 ? 'vitória' : 'vitórias'}.</p><div class="winner-options"><button class="winner-option" data-action="award" data-team="A"><strong>${esc(state.active.teamNames.A)}</strong><span>${state.active.wins.A} → ${state.active.wins.A+1}</span></button><button class="winner-option" data-action="award" data-team="B"><strong>${esc(state.active.teamNames.B)}</strong><span>${state.active.wins.B} → ${state.active.wins.B+1}</span></button></div><div class="modal-actions"><button class="quiet-btn" data-action="close-modal">Voltar ao jogo</button></div></section></div>`;
+        const configs = {
+          reset: { icon: '↺', title: 'Zerar o jogo?', text: 'O placar e a rodada em andamento serão descartados. O histórico salvo será mantido.', confirm: 'Zerar e recomeçar', action: 'confirm-reset', danger: true },
+          new: { icon: '×', title: 'Encerrar esta partida?', text: 'O placar atual não será adicionado ao histórico. Você poderá montar uma nova partida em seguida.', confirm: 'Encerrar partida', action: 'confirm-new', danger: true },
+          delete: { icon: '⌫', title: 'Excluir do histórico?', text: 'Esta partida será removida do histórico deste dispositivo.', confirm: 'Excluir partida', action: 'confirm-delete', danger: true },
+          clear: { icon: '⌫', title: 'Apagar todo o histórico?', text: 'Todas as partidas concluídas salvas neste dispositivo serão removidas.', confirm: 'Apagar tudo', action: 'confirm-clear', danger: true },
+          chooseSide: { icon: '↔', title: 'Em qual ponta colocar?', text: `A peça ${m.tile?.a}|${m.tile?.b} encaixa nas duas pontas da mesa. Escolha onde posicioná-la.`, confirm: null }
+        };
+        const cfg = configs[m.type]; if (!cfg) return '';
+        const choose = m.type === 'chooseSide';
+        return `<div class="modal-backdrop" data-action="backdrop"><section class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title"><div class="modal-icon">${cfg.icon}</div><h2 id="modal-title">${cfg.title}</h2><p>${cfg.text}</p>${choose ? `<div class="winner-options"><button class="winner-option" data-action="place-side" data-side="left"><strong>Ponta esquerda</strong><span>←</span></button><button class="winner-option" data-action="place-side" data-side="right"><strong>Ponta direita</strong><span>→</span></button></div>` : `<div class="modal-actions"><button class="quiet-btn" data-action="close-modal">Cancelar</button><button class="${cfg.danger ? 'danger-btn' : 'primary-btn'}" data-action="${cfg.action}">${cfg.confirm}</button></div>`}</section></div>`;
+      }
+      function render() {
+        const app = document.getElementById('app');
+        const active = state.active;
+        app.innerHTML = `<header class="topbar"><div class="brand"><div class="brand-mark" aria-hidden="true"><svg viewBox="0 0 28 28" fill="none"><rect x="5" y="2.5" width="18" height="23" rx="5" stroke="currentColor" stroke-width="1.8"/><path d="M6 14h16" stroke="currentColor" stroke-width="1.6"/><circle cx="10" cy="8" r="1.4" fill="currentColor"/><circle cx="18" cy="20" r="1.4" fill="currentColor"/><circle cx="10" cy="20" r="1.4" fill="currentColor"/></svg></div><div><div class="brand-name">Dominó Dó</div><div class="brand-sub">Placar & mesa</div></div></div><div class="top-status"><span class="status-dot"></span> Seus dados ficam neste dispositivo</div></header>
+          <section class="hero"><div class="hero-copy"><p class="eyebrow">A mesa é sua</p><h1>Jogue. Marque.<br>Vença junto.</h1><p>Seu cantinho do dominó: duplas, placar e cada peça jogada — tudo em um só lugar.</p></div><div class="hero-art" aria-hidden="true">${tileHTML(6,2)}${tileHTML(5,1)}</div></section>
+          <nav class="tabs" aria-label="Navegação principal"><button class="tab${state.view === 'game' ? ' active' : ''}" data-action="view" data-view="game">♧ &nbsp;Jogo</button><button class="tab${state.view === 'history' ? ' active' : ''}" data-action="view" data-view="history">▤ &nbsp;Histórico${state.history.length ? ` <span style="font-size:10px;opacity:.65">${state.history.length}</span>` : ''}</button></nav>
+          <main>${state.view === 'history' ? historyView() : active ? scoreView(active) : setupView()}</main>
+          <footer class="footer">Dominó Dó · Feito para a próxima boa partida.</footer>${modalHTML()}`;
+      }
+      function newRound(match) {
+        return { players: match.players.map(p => ({...p})), moves: [], turn: 0, leftEnd: null, rightEnd: null, nextMoveSequence: 1 };
+      }
+      function startMatch() {
+        const A = [...state.setupTeams.A], B = [...state.setupTeams.B];
+        if (!A.length || !B.length || A.length + B.length < 2) return toast('Escolha ao menos uma pessoa em cada dupla.');
+        const players = orderedSetupPlayers();
+        if (players.length > 4) return toast('Para esta mesa, selecione até 4 jogadores.');
+        state.turnOrder = players.map(p => p.name);
+        const match = { id: makeId(), startedAt: new Date().toISOString(), target: state.target, wins:{A:0,B:0}, teamNames:{...state.teamNames}, teams:{A,B}, players, roundNumber:1, rounds:[] };
+        match.round = newRound(match); state.active = match; state.view = 'game'; state.modal = null; persist(); render(); toast('Partida iniciada. Marque as peças conforme forem jogadas!');
+      }
+      function makeId() { return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2,8)}`; }
+      function currentPlayer() { const r = state.active?.round; return r?.players[r.turn]; }
+      function playable(tile, round) { if (!round.moves.length) return true; return tile.a === round.leftEnd || tile.b === round.leftEnd || tile.a === round.rightEnd || tile.b === round.rightEnd; }
+      function playTile(id, side) {
+        const match = state.active, round = match?.round, player = currentPlayer(); if (!round || !player) return;
+        const tile = makeSet().find(t => t.id === id); if (!tile) return;
+        if (round.moves.some(m => m.tile.id === id)) return toast('Essa peça já foi marcada como jogada.');
+        if (!playable(tile, round)) return toast('Essa peça não encaixa em nenhuma ponta.');
+        if (round.moves.length && side === undefined) {
+          const fitsLeft = tile.a === round.leftEnd || tile.b === round.leftEnd;
+          const fitsRight = tile.a === round.rightEnd || tile.b === round.rightEnd;
+          if (fitsLeft && fitsRight) { state.modal = {type:'chooseSide', tile}; render(); return; }
+          side = fitsLeft ? 'left' : 'right';
+        }
+        if (!round.moves.length) side = 'right';
+        let displayA, displayB;
+        if (side === 'right') {
+          if (round.moves.length === 0) { displayA = tile.a; displayB = tile.b; round.leftEnd = tile.a; round.rightEnd = tile.b; }
+          else if (tile.a === round.rightEnd) { displayA = tile.a; displayB = tile.b; round.rightEnd = tile.b; }
+          else { displayA = tile.b; displayB = tile.a; round.rightEnd = tile.a; }
+          round.moves.push({player:player.name, team:player.team, tile:{...tile}, displayA, displayB, side:'right', sequence:round.nextMoveSequence || 1});
+        } else {
+          if (tile.a === round.leftEnd) { displayA = tile.b; displayB = tile.a; round.leftEnd = tile.b; }
+          else { displayA = tile.a; displayB = tile.b; round.leftEnd = tile.a; }
+          round.moves.unshift({player:player.name, team:player.team, tile:{...tile}, displayA, displayB, side:'left', sequence:round.nextMoveSequence || 1});
+        }
+        round.nextMoveSequence = (round.nextMoveSequence || 1) + 1;
+        round.turn = (round.turn + 1) % round.players.length; state.modal = null; persist(); render();
+      }
+      function skipTurn() {
+        const round = state.active?.round; if (!round) return;
+        round.turn = (round.turn + 1) % round.players.length; persist(); render(); toast('Vez passada.');
+      }
+      function undoLastMove() {
+        const round = state.active?.round; if (!round?.moves.length) return;
+        let index = 0;
+        for (let i = 1; i < round.moves.length; i++) if ((round.moves[i].sequence || 0) >= (round.moves[index].sequence || 0)) index = i;
+        const [removed] = round.moves.splice(index, 1);
+        const playerIndex = round.players.findIndex(p => p.name === removed.player);
+        if (playerIndex >= 0) round.turn = playerIndex;
+        if (round.moves.length) {
+          round.leftEnd = round.moves[0].displayA ?? round.moves[0].tile.a;
+          round.rightEnd = round.moves[round.moves.length-1].displayB ?? round.moves[round.moves.length-1].tile.b;
+        } else { round.leftEnd = null; round.rightEnd = null; }
+        round.nextMoveSequence = Math.max(0, ...round.moves.map(m => m.sequence || 0)) + 1;
+        persist(); render(); toast(`Última jogada desfeita: ${removed.tile.a}|${removed.tile.b}.`);
+      }
+      function finishRound(team) {
+        const match = state.active; if (!match) return;
+        const winnerName = match.teamNames[team];
+        match.wins[team]++;
+        match.rounds.push({number:match.roundNumber,winnerTeam:team,winnerName,moves:match.round.moves.length,completedAt:new Date().toISOString()});
+        state.modal = null;
+        if (match.wins[team] >= match.target) {
+          const record = {...match, completedAt:new Date().toISOString(), winnerTeam:team, winnerName}; delete record.round;
+          state.history.push(record); state.active = null; state.view = 'history'; persist(); render(); toast(`${winnerName} venceu a partida!`); return;
+        }
+        match.roundNumber++; match.round = newRound(match); persist(); render(); toast(`${winnerName} ganhou a rodada. Próxima rodada!`);
+      }
+      function removeFromTeam(team, name) { state.setupTeams[team] = state.setupTeams[team].filter(n => n !== name); }
+      function addPlayer(form, team) {
+        const data = new FormData(form); const name = String(data.get('player') || '').trim().replace(/\s+/g,' ');
+        if (!name) return;
+        const found = state.players.find(n => n.toLocaleLowerCase('pt-BR') === name.toLocaleLowerCase('pt-BR'));
+        const actual = found || name;
+        if (!found) state.players.push(name);
+        if (state.setupTeams.A.includes(actual) || state.setupTeams.B.includes(actual)) { persist(); render(); return toast(`${actual} já está em uma dupla.`); }
+        if (allAssigned().length >= 4) { persist(); render(); return toast('A mesa aceita até 4 jogadores.'); }
+        state.setupTeams[team].push(actual); state.picker = team; persist(); render();
+      }
+      function handleAction(action, el, event) {
+        if (action === 'view') { state.view = el.dataset.view; state.modal = null; render(); }
+        if (action === 'pick-team') { state.picker = el.dataset.team; render(); }
+        if (action === 'move-order') { const order = orderedSetupPlayers().map(p => p.name), i = Number(el.dataset.index), j = i + Number(el.dataset.direction); if (j >= 0 && j < order.length) { [order[i], order[j]] = [order[j], order[i]]; state.turnOrder = order; persist(); render(); } }
+        if (action === 'toggle-player') {
+          const team = el.dataset.team, name = el.dataset.name, other = team === 'A' ? 'B' : 'A';
+          if (state.setupTeams[other].includes(name)) return;
+          if (state.setupTeams[team].includes(name)) removeFromTeam(team,name);
+          else if (allAssigned().length >= 4) return toast('A mesa aceita até 4 jogadores.');
+          else state.setupTeams[team].push(name);
+          persist(); render();
+        }
+        if (action === 'remove-player') { removeFromTeam(el.dataset.team, el.dataset.name); persist(); render(); }
+        if (action === 'target') { state.target = Number(el.dataset.value); persist(); render(); }
+        if (action === 'start-match') startMatch();
+        if (action === 'reset-match') { state.modal = {type:'reset'}; render(); }
+        if (action === 'new-match') { state.modal = {type:'new'}; render(); }
+        if (action === 'confirm-reset') { const m = state.active; m.wins = {A:0,B:0}; m.roundNumber = 1; m.rounds = []; m.round = newRound(m); m.startedAt = new Date().toISOString(); state.modal=null; persist(); render(); toast('Placar zerado. A partida recomeçou.'); }
+        if (action === 'confirm-new') { state.active=null; state.modal=null; state.view='game'; persist(); render(); }
+        if (action === 'finish-round') { state.modal = {type:'finish'}; render(); }
+        if (action === 'award') finishRound(el.dataset.team);
+        if (action === 'close-modal') { state.modal=null; render(); }
+        if (action === 'backdrop' && el === event.target) { state.modal=null; render(); }
+        if (action === 'play-tile') playTile(el.dataset.id);
+        if (action === 'place-side') playTile(state.modal?.tile?.id, el.dataset.side);
+        if (action === 'set-turn') { const round = state.active?.round, index = Number(el.dataset.index); if (round && index >= 0 && index < round.players.length) { round.turn = index; persist(); render(); toast(`Vez de ${round.players[index].name}.`); } }
+        if (action === 'skip-turn') skipTurn();
+        if (action === 'undo-move') undoLastMove();
+        if (action === 'delete-history') { state.modal={type:'delete',id:el.dataset.id}; render(); }
+        if (action === 'confirm-delete') { state.history=state.history.filter(x=>x.id!==state.modal.id); state.modal=null; persist(); render(); toast('Partida removida do histórico.'); }
+        if (action === 'clear-history') { state.modal={type:'clear'}; render(); }
+        if (action === 'confirm-clear') { state.history=[]; state.modal=null; persist(); render(); toast('Histórico apagado.'); }
+      }
+      document.addEventListener('click', event => {
+        const el = event.target.closest('[data-action]'); if (!el) return;
+        handleAction(el.dataset.action, el, event);
+      });
+      document.addEventListener('submit', event => {
+        const form = event.target.closest('form[data-form="add-player"]'); if (!form) return;
+        event.preventDefault(); addPlayer(form, form.dataset.team);
+      });
+      document.addEventListener('change', event => {
+        const input = event.target.closest('[data-team-name]'); if (!input) return;
+        const name = input.value.trim().replace(/\s+/g,' ').slice(0,24); state.teamNames[input.dataset.team] = name || (input.dataset.team === 'A' ? 'Dupla Verde' : 'Dupla Coral'); persist();
+      });
+      document.addEventListener('keydown', event => {
+        if (event.key === 'Escape' && state.modal) { state.modal=null; render(); }
+        if (event.key === 'Enter' && event.target.matches('[data-team-name]')) event.target.blur();
+      });
+      render();
+    })();
+  </script>
+</body>
+</html>
